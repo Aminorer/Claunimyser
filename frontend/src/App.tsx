@@ -3,7 +3,7 @@ import UploadPage from './components/UploadPage';
 import ProgressPage from './components/ProgressPage';
 import EditorInterface from './components/EditorInterface';
 import NotificationContainer from './components/NotificationContainer';
-import { useStores } from './stores/useStores';
+import { useStores } from './stores';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 
 type AppPage = 'upload' | 'progress' | 'editor';

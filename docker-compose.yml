@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  # Frontend React
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:5000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend-api
+    networks:
+      - anonymiseur-network
+
+  # Backend API Node.js (simple)
+  backend-api:
+    build:
+      context: ./backend-api
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - REDIS_URL=redis://redis:6379
+      - AI_SERVICE_URL=http://ai-service:8000
+      - CORS_ORIGIN=http://localhost:3000
+      - MAX_FILE_SIZE=26214400
+    volumes:
+      - ./backend-api:/app
+      - /app/node_modules
+    depends_on:
+      - redis
+      - ai-service
+    networks:
+      - anonymiseur-network
+
+  # Service IA Python
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONPATH=/app
+      - MODEL_CACHE_DIR=/app/models
+      - SPACY_MODEL=fr_core_news_lg
+    volumes:
+      - ./ai-service:/app
+      - ./models:/app/models
+    networks:
+      - anonymiseur-network
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+
+  # Cache Redis (pour sessions temporaires)
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - anonymiseur-network
+
+volumes:
+  redis_data:
+
+networks:
+  anonymiseur-network:
+    driver: bridge
