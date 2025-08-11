@@ -1,5 +1,6 @@
+// hooks/useEntitySearch.ts
 import { useState, useCallback } from 'react';
-import { useStores } from '../stores';
+import { useStores, EntityType } from '../stores';
 
 interface SearchResult {
   id: string;
@@ -13,6 +14,33 @@ export const useEntitySearch = () => {
   const { document, entities, ui } = useStores();
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+
+  const generateReplacement = (type: EntityType, value: string): string => {
+    switch (type) {
+      case 'EMAIL':
+        const [local, domain] = value.split('@');
+        return `${local.replace(/./g, 'X')}@${domain.replace(/[^.]/g, 'X')}`;
+      case 'PHONE':
+        return value.replace(/\d/g, 'X');
+      case 'DATE':
+        return value.replace(/\d/g, 'X');
+      case 'IBAN':
+        return value.substring(0, 4) + value.substring(4).replace(/./g, 'X');
+      case 'SIREN':
+      case 'SIRET':
+        return value.replace(/\d/g, 'X');
+      case 'PERSON':
+        return 'PERSONNE_XXX';
+      case 'ADDRESS':
+        return 'ADRESSE_XXX';
+      case 'LOC':
+        return 'LIEU_XXX';
+      case 'ORG':
+        return 'ORGANISATION_XXX';
+      default:
+        return 'XXX';
+    }
+  };
 
   const searchText = useCallback(async (
     query: string,
@@ -45,14 +73,7 @@ export const useEntitySearch = () => {
           return;
         }
       } else {
-        const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\  const searchText = useCallback(async (
-    query: string,
-    options: {
-      mode: 'text' | 'regex';
-      caseSensitive?: boolean;
-    } = { mode: 'text' }
-  ) => {
-    if (!query.');
+        const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         searchRegex = new RegExp(escapedQuery, options.caseSensitive ? 'g' : 'gi');
       }
 
@@ -86,7 +107,7 @@ export const useEntitySearch = () => {
     } catch (error) {
       ui.addNotification({
         type: 'error',
-        message: `Erreur lors de la recherche: ${error.message}`,
+        message: `Erreur lors de la recherche: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
       });
     } finally {
       setIsSearching(false);

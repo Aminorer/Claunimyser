@@ -1,5 +1,6 @@
+// hooks/useKeyboardShortcuts.ts
 import { useEffect } from 'react';
-import { useStores } from '../stores';
+import { useStores, TabType } from '../stores';
 
 export const useKeyboardShortcuts = () => {
   const { document, entities, ui } = useStores();

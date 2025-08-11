@@ -133,9 +133,7 @@ const UploadPage = () => {
   const handleProcessDocument = () => {
     if (!uploadedFile) return;
     
-    // Simulation de redirection vers page de progression
-    console.log(`Traitement du document ${uploadedFile.name} en mode ${selectedMode}`);
-    // Simulation de navigation - à remplacer par React Router
+    // Navigation vers page de progression
     window.dispatchEvent(new CustomEvent('navigate', { 
       detail: { page: 'progress', data: { file: uploadedFile, mode: selectedMode } }
     }));

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle, Clock, FileText, Brain, Zap, AlertCircle, Shield, Loader2 } from 'lucide-react';
+import { CheckCircle, Clock, FileText, Brain, Zap, Shield, Loader2 } from 'lucide-react';
 
 // Types
 type ProcessingStep = 'upload' | 'reading' | 'analysis' | 'interface' | 'complete';
@@ -16,15 +16,22 @@ interface ProcessingState {
   currentOperation: string;
 }
 
-const ProgressPage = () => {
+interface ProgressPageProps {
+  data?: {
+    file: { name: string };
+    mode: ProcessingMode;
+  };
+}
+
+const ProgressPage = ({ data }: ProgressPageProps) => {
   const [state, setState] = useState<ProcessingState>({
     currentStep: 'upload',
     progress: 0,
     entitiesDetected: 0,
     estimatedTime: 45,
     elapsedTime: 0,
-    mode: 'regex', // Serait passé en paramètre dans une vraie app
-    filename: 'Document_juridique.docx', // Serait passé en paramètre
+    mode: data?.mode || 'regex',
+    filename: data?.file?.name || 'Document_juridique.docx',
     currentOperation: 'Vérification du fichier...'
   });
 
@@ -97,12 +104,10 @@ const ProgressPage = () => {
         // Animation du progrès pour cette étape
         const stepProgress = 100 / (stepOrder.length - 1);
         const startProgress = i * stepProgress;
-        const endProgress = (i + 1) * stepProgress;
         
         // Opérations de l'étape
         for (let j = 0; j < stepConfig.operations.length; j++) {
           const operation = stepConfig.operations[j];
-          const operationDuration = stepConfig.duration / stepConfig.operations.length;
           
           setState(prev => ({
             ...prev,
@@ -111,7 +116,6 @@ const ProgressPage = () => {
 
           // Animation du progrès pendant l'opération
           const progressIncrement = stepProgress / stepConfig.operations.length;
-          const operationStartProgress = startProgress + (j * progressIncrement);
           const operationEndProgress = startProgress + ((j + 1) * progressIncrement);
           
           await new Promise(resolve => {
@@ -275,15 +279,6 @@ const ProgressPage = () => {
                       </p>
                     )}
                   </div>
-
-                  {/* Ligne de connexion */}
-                  {index < stepOrder.length - 2 && (
-                    <div className={`absolute left-5 mt-10 w-0.5 h-8 ${
-                      getStepStatus(stepOrder[index + 1]) !== 'pending' 
-                        ? 'bg-green-300' 
-                        : 'bg-gray-300'
-                    }`} style={{ marginLeft: '1.25rem' }}></div>
-                  )}
                 </div>
               );
             })}

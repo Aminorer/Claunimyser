@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { CheckCircle, AlertCircle, AlertTriangle, Info, X } from 'lucide-react';
-import { useStores } from '../stores/useStores';
+import { useStores } from '../stores';
 
 const NotificationContainer = () => {
   const { ui } = useStores();
